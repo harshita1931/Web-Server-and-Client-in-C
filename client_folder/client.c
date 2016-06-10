@@ -52,7 +52,6 @@ int main(int argc, char *argv[])
     if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
         error("ERROR connecting");
 
-    int check=0;    //check == 1 when client writes "bye" 
     int check_readfile = 0; //check_readfile == 1 when client writes "getf"
     char filename[100];
  
@@ -66,23 +65,15 @@ int main(int argc, char *argv[])
         /* send user message to server */
      
         n = write(sockfd,buffer,strlen(buffer));
-        if(buffer[0]=='b'&& buffer[1]=='y'&& buffer[2]=='e')    //implementing "bye"
-            check=1;
         if(buffer[0]=='g'&&buffer[1]=='e'&&buffer[2]=='t'&&buffer[3]=='f'){     //implementing getf (getfile)
             check_readfile = 1;
             int bufflen = strlen(buffer);
-                    printf("%d\n",bufflen );
-            //filename[bufflen-5];
 
-                    printf("hello1\n");
             int q;
             for(q=0; q<bufflen-6; ++q){
-               //     printf("%d\n",q );
                 filename[q] = buffer[q+5];                
             }
-                    printf("hello2\n");
             filename[bufflen-6] = '\0';
-                    printf("%s\n",filename );
 
         }
 
@@ -93,37 +84,27 @@ int main(int argc, char *argv[])
         /* read reply from server */
      
         n = read(sockfd,buffer,255);
-        printf("%s\n", buffer );
+    
         if (n < 0) 
              error("ERROR reading from socket");
-        //printf("%s\n",buffer);
 
-        if(check==1)
-            break;
 
         if(check_readfile==1){
             /* Create file where data will be stored*/
             FILE *fp;
-                printf("hello3\n");
             fp = fopen(filename,"w");
-                printf("hello4\n");
             if(NULL == fp){
                 printf("Error opening file\n");
-                return 1;   //see
+                return 1;   
             }
-                printf("hello5\n");
 
             while(n>0){
                 printf("Data recieved\n");
-            //    fwrite(buffer,1,n,fp);
                 fprintf(fp, "%s", buffer);
-                    printf("%s\n",buffer);
-                    printf("hello5.5\n");
                 bzero(buffer,256);
                 n = read(sockfd,buffer,255);
-                    printf("hello5.6\n");
             }
-                printf("hello6\n");
+            fclose(fp);
 
             if(n<0)
                 printf("Read error\n");
